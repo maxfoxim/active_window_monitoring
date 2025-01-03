@@ -8,14 +8,14 @@ from datetime import datetime
 """
 TODO:
 - Minuten statt Sekunden
-- Einzelanwendungen auch plotten
-
+- sonstige Kategorie
 """
-
+SCHLAFZEIT=5 # Abstand Messung
 ANZAHL_ITERATIONEN= 10**10
-ALLE_SEKUNDEN_SPEICHERN_JSON=5
-SCHLAFZEIT=2 # Abstand Messung
-ALLE_SEKUNDEN_SPEICHERN_BARCHART=1#60*5
+ALLE_SEKUNDEN_SPEICHERN_JSON=5*60/SCHLAFZEIT
+ALLE_SEKUNDEN_SPEICHERN_BARCHART=60*5/SCHLAFZEIT
+MINUTEN=60 # Umrechnung Sekunden in Minuten
+MINDESTDAUER = 60 # Mindestdauer Fenster offen für Zeigen in Chart
 
 Programme = ["Visual Studio Code", "VMware Remote Console","Excel",
              "DBeaver", "Mozilla Firefox", "Rainbow","Windows PowerShell",
@@ -46,7 +46,7 @@ for i in range(ANZAHL_ITERATIONEN):
     
     # Bereinigung:
     try:
-        aktuelles_fenster=aktuelles_fenster.replace("●","")
+        aktuelles_fenster=aktuelles_fenster.replace("● ","")
     except:
         pass
     
@@ -65,14 +65,14 @@ for i in range(ANZAHL_ITERATIONEN):
 
         # Genaues Fenster
         if aktuelles_fenster in fenster:
-            fenster[aktuelles_fenster]=fenster[aktuelles_fenster]+1
+            fenster[aktuelles_fenster]=fenster[aktuelles_fenster]+SCHLAFZEIT
         else:
-            fenster[aktuelles_fenster]=1
+            fenster[aktuelles_fenster]=SCHLAFZEIT
 
         # Anwendung allgemein
         for Programm in Programme:
             if Programm in aktuelles_fenster:
-                anwendung[Programm]=anwendung[Programm]+1
+                anwendung[Programm]=anwendung[Programm]+SCHLAFZEIT
                 print("Aktuelle Anwendung:",Programm)
     except:
          print("Konnte nicht gespeichert werden.")
@@ -90,11 +90,12 @@ for i in range(ANZAHL_ITERATIONEN):
     if i%ALLE_SEKUNDEN_SPEICHERN_BARCHART==0:
         x_arr,y_arr=[],[]
         for key in fenster:
-            try:
-                x_arr.append(key)
-                y_arr.append(fenster[key])
-            except:
-                print("Nicht speicherbar")
+            if (type(key)==str) and (MINDESTDAUER < fenster[key]):
+                try:
+                    x_arr.append(key)
+                    y_arr.append(round(fenster[key]/MINUTEN,1))
+                except:
+                    print("Nicht speicherbar")
                 
         x_arr = [x for _,x in sorted(zip(y_arr,x_arr))]
         y_arr = sorted(y_arr)
@@ -118,9 +119,9 @@ for i in range(ANZAHL_ITERATIONEN):
         # Plotte Anwendungen
         x_arr,y_arr=[],[]
         for key in anwendung:
-            if anwendung[key]>0:
+            if (anwendung[key]>0) and  (type(key)==str) and (MINDESTDAUER < anwendung[key]):
                 x_arr.append(key)
-                y_arr.append(anwendung[key])
+                y_arr.append(round(anwendung[key]/MINUTEN,1))
         
         x_arr = [x for _,x in sorted(zip(y_arr,x_arr))]
         y_arr = sorted(y_arr)
